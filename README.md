@@ -155,6 +155,25 @@ Ali devem aparecer:
 
 ## Como executar o projeto
 
+### Forma mais facil
+
+Na pasta do projeto, de dois cliques no arquivo:
+
+```text
+iniciar.bat
+```
+
+Anotacao minha:
+Eu criei esse arquivo para facilitar a execucao. Ele entra na pasta do projeto, cria o ambiente virtual se precisar, instala as dependencias e inicia o sistema.
+
+Depois abra no navegador:
+
+```text
+http://127.0.0.1:5000
+```
+
+### Forma manual
+
 ### 1. Entrar na pasta do projeto
 
 ```powershell
