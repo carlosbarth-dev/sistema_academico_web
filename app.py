@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask, flash, redirect, render_template, request, url_for
-from psycopg2 import Error as PostgresError
+from pg8000.dbapi import DatabaseError
 
 from database import inicializar_banco
 from repositories import (
@@ -66,7 +66,7 @@ def salvar_turma():
             request.form["turno"].strip(),
         )
         flash("Turma salva com sucesso.", "sucesso")
-    except PostgresError as erro:
+    except DatabaseError as erro:
         flash(f"Erro ao salvar turma: {erro}", "erro")
 
     return redirect(url_for("index"))
@@ -81,7 +81,7 @@ def salvar_aluno():
             int(request.form["turma_id"]),
         )
         flash("Aluno cadastrado com sucesso.", "sucesso")
-    except PostgresError as erro:
+    except DatabaseError as erro:
         flash(f"Erro ao cadastrar aluno: {erro}", "erro")
 
     return redirect(url_for("index"))
@@ -97,7 +97,7 @@ def salvar_nota():
             float(request.form["nota2"]),
         )
         flash("Nota lancada com sucesso.", "sucesso")
-    except PostgresError as erro:
+    except DatabaseError as erro:
         flash(f"Erro ao lancar nota: {erro}", "erro")
 
     return redirect(url_for("index", aluno_id=request.form["aluno_id"]))

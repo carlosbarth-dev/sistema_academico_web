@@ -1,10 +1,9 @@
 import os
+import re
 from contextlib import contextmanager
 from pathlib import Path
 
-import psycopg2
-from psycopg2 import sql
-from psycopg2.extras import RealDictCursor
+import pg8000.dbapi
 from dotenv import load_dotenv
 
 
@@ -16,7 +15,7 @@ DB_CONFIG = {
     "port": int(os.getenv("PGPORT", "5432")),
     "user": os.getenv("PGUSER", "postgres"),
     "password": os.getenv("PGPASSWORD", ""),
-    "dbname": os.getenv("PGDATABASE", "sistema_academico_web"),
+    "database": os.getenv("PGDATABASE", "sistema_academico_web"),
 }
 
 
@@ -24,8 +23,13 @@ def _config_sem_banco():
     """Eu uso essa conexao temporaria para criar o banco caso ele ainda nao exista."""
 
     config = DB_CONFIG.copy()
-    config["dbname"] = "postgres"
+    config["database"] = "postgres"
     return config
+
+
+def _validar_nome_banco(nome_banco):
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", nome_banco):
+        raise ValueError("Nome de banco invalido. Use apenas letras, numeros e underline.")
 
 
 def criar_banco_se_necessario():
@@ -36,19 +40,20 @@ def criar_banco_se_necessario():
     fica mais facil de testar em outro computador.
     """
 
-    nome_banco = DB_CONFIG["dbname"]
-    conexao = psycopg2.connect(**_config_sem_banco())
+    nome_banco = DB_CONFIG["database"]
+    _validar_nome_banco(nome_banco)
+
+    conexao = pg8000.dbapi.connect(**_config_sem_banco())
     conexao.autocommit = True
 
     try:
-        with conexao.cursor() as cursor:
-            cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (nome_banco,))
-            existe = cursor.fetchone()
+        cursor = conexao.cursor()
+        cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (nome_banco,))
+        existe = cursor.fetchone()
 
-            if not existe:
-                cursor.execute(
-                    sql.SQL("CREATE DATABASE {}").format(sql.Identifier(nome_banco))
-                )
+        if not existe:
+            cursor.execute(f'CREATE DATABASE "{nome_banco}"')
+        cursor.close()
     finally:
         conexao.close()
 
@@ -69,8 +74,9 @@ def inicializar_banco():
         comandos_sql = arquivo.read()
 
     with get_connection() as conexao:
-        with conexao.cursor() as cursor:
-            cursor.execute(comandos_sql)
+        cursor = conexao.cursor()
+        cursor.execute(comandos_sql)
+        cursor.close()
 
 
 @contextmanager
@@ -83,7 +89,7 @@ def get_connection():
     Isso deixa o sistema mais organizado e parecido com um padrao profissional.
     """
 
-    conexao = psycopg2.connect(**DB_CONFIG)
+    conexao = pg8000.dbapi.connect(**DB_CONFIG)
 
     try:
         yield conexao
@@ -97,24 +103,41 @@ def get_connection():
 
 def fetch_all(query, params=None):
     with get_connection() as conexao:
-        with conexao.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(query, params or ())
-            return cursor.fetchall()
+        cursor = conexao.cursor()
+        cursor.execute(query, params or ())
+        colunas = [coluna[0] for coluna in cursor.description]
+        linhas = [dict(zip(colunas, linha)) for linha in cursor.fetchall()]
+        cursor.close()
+        return linhas
 
 
 def fetch_one(query, params=None):
     with get_connection() as conexao:
-        with conexao.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(query, params or ())
-            return cursor.fetchone()
+        cursor = conexao.cursor()
+        cursor.execute(query, params or ())
+        linha = cursor.fetchone()
+
+        if not linha:
+            cursor.close()
+            return None
+
+        colunas = [coluna[0] for coluna in cursor.description]
+        resultado = dict(zip(colunas, linha))
+        cursor.close()
+        return resultado
 
 
 def execute(query, params=None):
     with get_connection() as conexao:
-        with conexao.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(query, params or ())
+        cursor = conexao.cursor()
+        cursor.execute(query, params or ())
 
-            if cursor.description:
-                return cursor.fetchone()
+        if cursor.description:
+            linha = cursor.fetchone()
+            colunas = [coluna[0] for coluna in cursor.description]
+            resultado = dict(zip(colunas, linha))
+            cursor.close()
+            return resultado
 
-            return None
+        cursor.close()
+        return None
