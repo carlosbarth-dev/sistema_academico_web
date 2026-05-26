@@ -54,6 +54,26 @@ body {
     box-shadow: var(--sombra);
 }
 
+.mensagens {
+    margin-bottom: 16px;
+}
+
+.mensagens p {
+    margin: 0 0 8px;
+    border-radius: 6px;
+    padding: 10px 12px;
+}
+
+.mensagens .sucesso {
+    background: #dff7e8;
+    color: var(--verde);
+}
+
+.mensagens .erro {
+    background: #ffe2e2;
+    color: var(--vermelho);
+}
+
 .resumo {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -108,7 +128,11 @@ select {
     background: #ffffff;
 }
 
-button {
+button,
+.botao-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     height: 40px;
     border: 0;
     border-radius: 6px;
@@ -117,15 +141,12 @@ button {
     color: #ffffff;
     font-weight: 700;
     cursor: pointer;
+    text-decoration: none;
 }
 
-button:hover {
+button:hover,
+.botao-link:hover {
     filter: brightness(0.95);
-}
-
-.botao-secundario {
-    background: #ffffff;
-    color: #172033;
 }
 
 .botao-perigo {
@@ -204,7 +225,12 @@ th {
     gap: 8px;
 }
 
-.acoes button {
+.acoes form {
+    margin: 0;
+}
+
+.acoes button,
+.acoes .botao-link {
     height: 32px;
     font-size: 12px;
 }
