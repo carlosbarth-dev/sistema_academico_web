@@ -1,4 +1,4 @@
-const CHAVE_DADOS = "sistema_escolar_carlos";
+const CHAVE_DADOS = "sistema_academico_web";
 
 let estado = carregarDados();
 
