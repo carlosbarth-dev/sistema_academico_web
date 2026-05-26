@@ -1,4 +1,11 @@
+﻿from werkzeug.security import generate_password_hash
+
 from database import execute, fetch_all, fetch_one
+
+
+# Anotacao minha:
+# Eu deixei este arquivo apenas para comandos de banco.
+# Assim o app.py cuida das rotas e este arquivo cuida do SQL.
 
 
 def listar_turmas():
@@ -32,6 +39,10 @@ def listar_alunos(busca=""):
             a.id,
             a.nome,
             a.matricula,
+            a.cpf,
+            a.telefone,
+            a.email,
+            a.data_nascimento,
             t.nome AS turma,
             ROUND(AVG(n.media), 2) AS media
           FROM alunos a
@@ -39,21 +50,23 @@ def listar_alunos(busca=""):
           LEFT JOIN notas n ON n.aluno_id = a.id
          WHERE a.nome ILIKE %s
             OR a.matricula ILIKE %s
-         GROUP BY a.id, a.nome, a.matricula, t.nome
+            OR COALESCE(a.cpf, '') ILIKE %s
+            OR COALESCE(a.email, '') ILIKE %s
+         GROUP BY a.id, a.nome, a.matricula, a.cpf, a.telefone, a.email, a.data_nascimento, t.nome
          ORDER BY a.nome
         """,
-        (termo, termo),
+        (termo, termo, termo, termo),
     )
 
 
-def criar_aluno(nome, matricula, turma_id):
+def criar_aluno(nome, matricula, cpf, telefone, email, data_nascimento, turma_id):
     return execute(
         """
-        INSERT INTO alunos (nome, matricula, turma_id)
-        VALUES (%s, %s, %s)
+        INSERT INTO alunos (nome, matricula, cpf, telefone, email, data_nascimento, turma_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         RETURNING id
         """,
-        (nome, matricula, turma_id),
+        (nome, matricula, cpf, telefone, email, data_nascimento or None, turma_id),
     )
 
 
@@ -64,7 +77,15 @@ def remover_aluno(aluno_id):
 def buscar_aluno(aluno_id):
     return fetch_one(
         """
-        SELECT a.id, a.nome, a.matricula, t.nome AS turma
+        SELECT
+            a.id,
+            a.nome,
+            a.matricula,
+            a.cpf,
+            a.telefone,
+            a.email,
+            a.data_nascimento,
+            t.nome AS turma
           FROM alunos a
           JOIN turmas t ON t.id = a.turma_id
          WHERE a.id = %s
@@ -140,3 +161,42 @@ def resumo_dashboard():
           FROM medias_alunos
         """
     )
+
+
+def buscar_usuario_por_login(login):
+    return fetch_one(
+        """
+        SELECT id, nome, login, senha_hash, perfil, professor_id
+          FROM usuarios
+         WHERE login = %s
+           AND ativo = TRUE
+        """,
+        (login,),
+    )
+
+
+def criar_usuario_padrao(nome, login, senha, perfil, professor_id=None):
+    # Anotacao minha:
+    # Eu nunca salvo senha pura no banco. Primeiro transformo em hash.
+    # Assim, mesmo olhando a tabela usuarios no pgAdmin4, a senha nao aparece aberta.
+    execute(
+        """
+        INSERT INTO usuarios (nome, login, senha_hash, perfil, professor_id)
+        VALUES (%s, %s, %s, %s, %s)
+        ON CONFLICT (login) DO NOTHING
+        """,
+        (nome, login, generate_password_hash(senha), perfil, professor_id),
+    )
+
+
+def professor_padrao():
+    return fetch_one("SELECT id FROM professores WHERE email = %s", ("mariana.prof@example.com",))
+
+
+def criar_usuarios_padrao():
+    professora = professor_padrao()
+    professora_id = professora["id"] if professora else None
+
+    criar_usuario_padrao("Administrador", "admin", "admin123", "admin")
+    criar_usuario_padrao("Secretaria", "secretaria", "secretaria123", "secretaria")
+    criar_usuario_padrao("Mariana Souza", "professor", "professor123", "professor", professora_id)

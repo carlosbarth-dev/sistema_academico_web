@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema Academico Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="pagina-login">
+    <main class="login-layout">
+        <section class="login-apresentacao">
+            <h1>Sistema Academico Web</h1>
+            <p>Entrada por perfil para admin, secretaria e professor.</p>
+        </section>
+
+        <form action="{{ url_for('login') }}" method="post" class="painel login-card">
+            <h2>Acessar sistema</h2>
+
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+                {% if mensagens %}
+                    <div class="mensagens">
+                        {% for categoria, mensagem in mensagens %}
+                            <p class="{{ categoria }}">{{ mensagem }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <label>
+                Usuario
+                <input name="login" type="text" placeholder="Ex.: admin" required autofocus>
+            </label>
+            <label>
+                Senha
+                <input name="senha" type="password" placeholder="Digite sua senha" required>
+            </label>
+            <button type="submit">Entrar</button>
+
+            <div class="credenciais">
+                <strong>Usuarios de teste</strong>
+                <span>admin / admin123</span>
+                <span>secretaria / secretaria123</span>
+                <span>professor / professor123</span>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

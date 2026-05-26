@@ -240,3 +240,50 @@ http://127.0.0.1:5000
 Desenvolvido por Carlos Barth.
 
 Estudante de Analise e Desenvolvimento de Sistemas.
+
+## Login e perfis
+
+Eu adicionei uma tela de login para o sistema ficar mais parecido com um sistema academico real.
+
+Usuarios criados automaticamente para teste:
+
+```text
+admin / admin123
+secretaria / secretaria123
+professor / professor123
+```
+
+Anotacao minha:
+Eu deixei tres perfis porque cada um faz sentido dentro de uma faculdade.
+O admin pode acessar tudo, a secretaria cuida de alunos e turmas, e o professor cuida das notas.
+
+Permissoes principais:
+
+- `admin`: cadastra turmas, alunos, notas, remove alunos e consulta boletins.
+- `secretaria`: cadastra turmas, alunos, remove alunos e consulta boletins.
+- `professor`: consulta alunos, consulta boletins e lanca notas.
+
+## Novos dados do estudante
+
+Agora o cadastro de aluno guarda mais informacoes:
+
+- nome;
+- matricula;
+- CPF;
+- telefone;
+- email;
+- data de nascimento;
+- turma.
+
+Anotacao minha:
+Eu escolhi esses campos porque eles fazem sentido para identificar e entrar em contato com o estudante.
+Eu nao coloquei informacoes desnecessarias, como genero, porque isso nao era importante para a regra do sistema.
+
+## Sobre as senhas
+
+As senhas nao ficam salvas abertas no banco.
+
+Anotacao minha:
+Eu uso `generate_password_hash` para transformar a senha em hash antes de salvar.
+Na hora do login, uso `check_password_hash` para comparar a senha digitada com o hash salvo.
+Assim eu pratico uma forma mais correta de trabalhar com autenticacao.

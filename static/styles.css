@@ -271,3 +271,95 @@ th {
         width: 100%;
     }
 }
+
+.usuario-topo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #dbe5f4;
+}
+
+.botao-claro {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    border-radius: 6px;
+    padding: 0 12px;
+    background: #ffffff;
+    color: #172033;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.painel-aluno {
+    grid-column: span 2;
+}
+
+.pagina-login {
+    min-height: 100vh;
+    background: #172033;
+}
+
+.login-layout {
+    width: min(980px, calc(100% - 32px));
+    min-height: 100vh;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 390px;
+    align-items: center;
+    gap: 32px;
+}
+
+.login-apresentacao {
+    color: #ffffff;
+}
+
+.login-apresentacao h1 {
+    margin: 0 0 12px;
+    font-size: 42px;
+}
+
+.login-apresentacao p {
+    margin: 0;
+    color: #c6d0e1;
+    font-size: 18px;
+}
+
+.login-card {
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+}
+
+.login-card button {
+    width: 100%;
+}
+
+.credenciais {
+    display: grid;
+    gap: 6px;
+    margin-top: 16px;
+    border-top: 1px solid var(--linha);
+    padding-top: 14px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.credenciais strong {
+    color: var(--texto);
+}
+
+@media (max-width: 860px) {
+    .login-layout {
+        grid-template-columns: 1fr;
+        padding: 32px 0;
+    }
+
+    .painel-aluno {
+        grid-column: span 1;
+    }
+
+    .usuario-topo {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
